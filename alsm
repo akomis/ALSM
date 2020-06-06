@@ -18,7 +18,7 @@ pc=1
 # Default: /dev/null
 out="/dev/null"
 
-printf "ALSM Report created on $(date)" > $rp
+printf "--- ALSM Report created on $(date) --- \n\n" > $rp
 
 # PROCEDURES #
 # Check for errors
@@ -29,9 +29,9 @@ then
 	printf "'systemctl --failed' output:\n" >> $rp
 	systemctl --failed >> $rp
 	printf "\n" >> $rp
-	printf "[FIX] Please follow the instructions in https://wiki.archlinux.org/index.php/Systemd#Investigating_failed_services to resolve your issue(s).\n" >> $rp
+	printf "[FIX] Please follow the instructions in https://wiki.archlinux.org/index.php/Systemd#Investigating_failed_services to resolve your issue(s).\n\n" >> $rp
 else
-	printf "[SAFE] No failed systemd services found.\n" >> $rp
+	printf "[SAFE] No failed systemd services found.\n\n" >> $rp
 fi
 
 error_count="$(journalctl -p 3 -xb | wc -l)"
@@ -43,16 +43,16 @@ then
 	journalctl -p 3 -xb >> $rp
 	printf "\n" >> $rp
 else
-	printf "[SAFE] No errors found in /var/log logfiles.\n" >> $rp
+	printf "[SAFE] No errors found in /var/log logfiles.\n\n" >> $rp
 fi
 
 # Backup
 # If the enviromental variable $BACKUP with a backup path is set then create backup there
 if [ -v $BACKUP ]
 then
-	rsync -a -r --delete --quiet --exclude={""} $bp $BACKUP && printf "[DONE] Succesfully backed up $bp to $BACKUP \n" >> $rp
+	rsync -a -r --delete --quiet --exclude={""} $bp $BACKUP && printf "[DONE] Succesfully backed up $bp to $BACKUP \n\n" >> $rp
 else
-	printf "[ATTENTION] Enviromental variable \$BACKUP not set. No backup has been done.\n" >> $rp
+	printf "[ATTENTION] Enviromental variable \$BACKUP not set. No backup has been done.\n\n" >> $rp
 fi
 
 # System Upgrade
@@ -64,15 +64,16 @@ fi
 yes | pacman -Rsn $(pacman -Qdtq) > $out && printf "[DONE] Succesfully removed unused dependencies \n" >> $rp
 
 # Update mirror list
-reflector --latest 100 --protocol http --protocol https --sort rate --save /etc/pacman.d/mirrorlist && printf "[DONE] Succesfully updated and sorted the mirror list \n" >> $rp
+reflector --latest 100 --protocol http --protocol https --sort rate --save /etc/pacman.d/mirrorlist && printf "[DONE] Succesfully updated and sorted the mirror list \n\n" >> $rp
 
 # Clean the filesystem
 # Clear pacman cache
-paccache -rk$pc > $out && printf "[DONE] Succesfully cleared cache and left just the $pc latest version(s) of each cached package \n">> $rp
+paccache -rk$pc > $out && printf "[DONE] Succesfully cleared cache and left just the $pc latest version(s) of each cached package \n\n" >> $rp
 # Comment line below if you do not want to remove cache of uninstalled packages
-paccache -ruk0 > $out && printf "[DONE] Succesfully cleared cache of all uninstalled packages \n" >> $rp
+paccache -ruk0 > $out && printf "[DONE] Succesfully cleared cache of all uninstalled packages \n\n" >> $rp
 
 # Remove duplicates
-rmlint $HOME | tail -n7 | head -n4 > $rp
-yes | bash rmlint.sh -d >> $out && printf "[DONE] Succesfully removed duplicate files with rmlint \n" >> $rp
+printf "rmlint $HOME:\n" >> $rp
+rmlint $HOME | tail -n7 | head -n4 >> $rp
+yes | bash rmlint.sh -d > $out && printf "[DONE] Succesfully removed duplicate files with rmlint \n" >> $rp
 rm rmlint.*

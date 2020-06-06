@@ -14,7 +14,7 @@ A simple bash script that mainly follows the [System maintenance](https://wiki.a
 
 After successful execution, the script produces report.txt at the script directory where there is a list of any errors by any of the procedures or the script itself. It is highly recommended to check the report and act on any manual user intervention needed.
 ## Configuration
-Before running the script alter any global $variables according to your system/preferences. Each variable has a description of use and a pointer to the script line(s) it is being used.
+Before running the script alter any global $variables according to your system/preferences. Each variable has a description of use.
 It is recommended that the script is run through a cron job to keep the system regularly maintained.
 Also make sure to make the script executable with `chmod +x alsm`
 ## Dependencies
