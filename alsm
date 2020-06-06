@@ -4,19 +4,19 @@
 # Version: 1.0
 # Please read carefully the README.md
 
-# The script location (path) (cannot be a symlink)
-current_path="$(cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd)"
-
 # CONFIGURATION #
 # The path where the final report will be outputted to
-# Default: $current_path
-rp=$current_path/report.txt
+# Default: $HOME
+rp=$HOME/report.txt
 # What should be backed up
 # Default: $HOME
 bp=$HOME
 # How many package versions to keep in cache
 # Default: 1
 pc=1
+# Where to redirect original output of commands
+# Default: /dev/null
+out="/dev/null"
 
 printf "ALSM Report created on $(date)" > $rp
 
@@ -48,11 +48,11 @@ fi
 
 # Backup
 # If the enviromental variable $BACKUP with a backup path is set then create backup there
-if [ -z "$BACKUP" ]
+if [ -v $BACKUP ]
 then
-	rsync -a -r --delete --quiet --exclude={""} $bp $BACKUP && printf "[DONE] Succesfully backed up $bp to $BACKUP \n">> $rp
+	rsync -a -r --delete --quiet --exclude={""} $bp $BACKUP && printf "[DONE] Succesfully backed up $bp to $BACKUP \n" >> $rp
 else
-	printf "[ATTENTION] Enviromental variable $BACKUP not set. No backup has been done." >> $rp
+	printf "[ATTENTION] Enviromental variable \$BACKUP not set. No backup has been done.\n" >> $rp
 fi
 
 # System Upgrade
@@ -61,20 +61,18 @@ fi
 #yes | pacman -Syu && printf "[DONE] Succesfully upgraded system\n">> $rp
 
 # Remove orphans/unused packages
-pacman -Rsn $(pacman -Qdtq) && printf "[DONE] Succesfully removed unused dependencies \n">> $rp
+yes | pacman -Rsn $(pacman -Qdtq) > $out && printf "[DONE] Succesfully removed unused dependencies \n" >> $rp
 
 # Update mirror list
-cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.backup
-sed -i 's/^#Server/Server/' /etc/pacman.d/mirrorlist.backup
-rankmirrors -n 6 /etc/pacman.d/mirrorlist.backup > /etc/pacman.d/mirrorlist && printf "[DONE] Succesfully ranked mirror list \n">> $rp
+reflector --latest 100 --protocol http --protocol https --sort rate --save /etc/pacman.d/mirrorlist && printf "[DONE] Succesfully updated and sorted the mirror list \n" >> $rp
 
 # Clean the filesystem
 # Clear pacman cache
-paccache -rk$pc
+paccache -rk$pc > $out && printf "[DONE] Succesfully cleared cache and left just the $pc latest version(s) of each cached package \n">> $rp
 # Comment line below if you do not want to remove cache of uninstalled packages
-paccache -ruk0
+paccache -ruk0 > $out && printf "[DONE] Succesfully cleared cache of all uninstalled packages \n" >> $rp
 
 # Remove duplicates
-rmlint $HOME | tail -n7 | head -n4 >> $rp
-bash rmlint.sh && printf "[DONE] Succesfully removed duplicate files with rmlint \n">> $rp
+rmlint $HOME | tail -n7 | head -n4 > $rp
+yes | bash rmlint.sh -d >> $out && printf "[DONE] Succesfully removed duplicate files with rmlint \n" >> $rp
 rm rmlint.*
