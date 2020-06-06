@@ -1,1 +1,80 @@
 #!/bin/bash
+# Arch Linux System Maintenance
+# Author: https://github.com/akomis
+# Version: 1.0
+# Please read carefully the README.md
+
+# The script location (path) (cannot be a symlink)
+current_path="$(cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd)"
+
+# CONFIGURATION #
+# The path where the final report will be outputted to
+# Default: $current_path
+rp=$current_path/report.txt
+# What should be backed up
+# Default: $HOME
+bp=$HOME
+# How many package versions to keep in cache
+# Default: 1
+pc=1
+
+printf "ALSM Report created on $(date)" > $rp
+
+# PROCEDURES #
+# Check for errors
+failed_count="$(systemctl status | grep "Failed: " | awk '{print $2}')"
+if [ $failed_count -gt 0 ]
+then
+	printf "[ATTENTION] $failed_count failed systemd services found. \n" >> $rp
+	printf "'systemctl --failed' output:\n" >> $rp
+	systemctl --failed >> $rp
+	printf "\n" >> $rp
+	printf "[FIX] Please follow the instructions in https://wiki.archlinux.org/index.php/Systemd#Investigating_failed_services to resolve your issue(s).\n" >> $rp
+else
+	printf "[SAFE] No failed systemd services found.\n" >> $rp
+fi
+
+error_count="$(journalctl -p 3 -xb | wc -l)"
+let "error_count = $error_count - 1"
+if [ $error_count -gt 0 ]
+then
+	printf "[ATTENTION] $error_count errors found in /var/log log files. \n" >> $rp
+	printf "'journalctl -p 3 -xb' output:\n" >> $rp
+	journalctl -p 3 -xb >> $rp
+	printf "\n" >> $rp
+else
+	printf "[SAFE] No errors found in /var/log logfiles.\n" >> $rp
+fi
+
+# Backup
+# If the enviromental variable $BACKUP with a backup path is set then create backup there
+if [ -z "$BACKUP" ]
+then
+	rsync -a -r --delete --quiet --exclude={""} $bp $BACKUP && printf "[DONE] Succesfully backed up $bp to $BACKUP \n">> $rp
+else
+	printf "[ATTENTION] Enviromental variable $BACKUP not set. No backup has been done." >> $rp
+fi
+
+# System Upgrade
+# It is not recommended to uncomment the line below because upgrading your system will possibly require user intervention
+# and it is generally a serious task that shouldn't be automated. Only uncomment this line if you have read this https://wiki.archlinux.org/index.php/System_maintenance#Read_before_upgrading_the_system
+#yes | pacman -Syu && printf "[DONE] Succesfully upgraded system\n">> $rp
+
+# Remove orphans/unused packages
+pacman -Rsn $(pacman -Qdtq) && printf "[DONE] Succesfully removed unused dependencies \n">> $rp
+
+# Update mirror list
+cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.backup
+sed -i 's/^#Server/Server/' /etc/pacman.d/mirrorlist.backup
+rankmirrors -n 6 /etc/pacman.d/mirrorlist.backup > /etc/pacman.d/mirrorlist && printf "[DONE] Succesfully ranked mirror list \n">> $rp
+
+# Clean the filesystem
+# Clear pacman cache
+paccache -rk$pc
+# Comment line below if you do not want to remove cache of uninstalled packages
+paccache -ruk0
+
+# Remove duplicates
+rmlint $HOME | tail -n7 | head -n4 >> $rp
+bash rmlint.sh && printf "[DONE] Succesfully removed duplicate files with rmlint \n">> $rp
+rm rmlint.*

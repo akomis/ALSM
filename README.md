@@ -6,7 +6,7 @@ A simple bash script that mainly follows the [System maintenance](https://wiki.a
 - Check if any systemd services have entered in a failed state
 - Look for errors in the log files located at /var/log, as well as high priority
 - Backup data using rsync
-- Upgrade system
+- Upgrade system (disabled by default)
 - Check for orphans and dropped packages
 - Update the mirror list
 - Clear package cache
@@ -16,6 +16,7 @@ After successful execution, the script produces report.txt at the script directo
 ## Configuration
 Before running the script alter any global $variables according to your system/preferences. Each variable has a description of use and a pointer to the script line(s) it is being used.
 It is recommended that the script is run through a cron job to keep the system regularly maintained.
+Also make sure to make the script executable with `chmod +x alsm`
 ## Dependencies
 Get all the required packages to run the script at its full potential with  
 `sudo pacman -S rsync rmlint`
