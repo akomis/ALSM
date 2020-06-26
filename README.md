@@ -14,7 +14,7 @@ A simple bash script that mainly follows the [System maintenance](https://wiki.a
 
 After successful execution, the script produces report.txt at the specified directory where there is a status message for each procedure done by the script. It is highly recommended to check the report and act on any manual user intervention needed.
 ## Configuration
-Before running the script alter any global $variables according to your system/preferences. Each variable has a description of use.
+Before running the script alter any global $variables according to your system/preferences. Each variable has a description of use found in the source code as a comment above it.
 ## Dependencies
 Get all the required packages to run the script at its full potential with  
 `sudo pacman -S rsync rmlint reflector`
