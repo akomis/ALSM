@@ -23,4 +23,4 @@ Get all the required packages to run the script at its full potential with
 `chmod +x alsm`  
 `sudo ./alsm`  
 ## Disclaimer
-This script is considered safe to use as it follows best practices found in the Arch wiki and it is generally risk averse (out of the box). However, proper configuration and use of the script is required to get the desired results and in no way is the author of this script responsible for any unwanted results to your system. It is highly recommended that the user reads the source code and alters it if necessary to suit the system before executing it.
+This script is considered safe to use as it follows best practices found in the Arch wiki and it is generally risk averse (out of the box). However, proper configuration and use of the script is required to get the desired results and in no way is the author of this script responsible for any unwanted results to your system. It is highly recommended that the user reads the source code and alters it if necessary to suit the system before execution.
