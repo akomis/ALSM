@@ -6,19 +6,21 @@ A simple bash script that mainly follows the [System maintenance](https://wiki.a
 - Check if any systemd services have entered in a failed state
 - Look for errors in the log files located at /var/log, as well as high priority
 - Backup data using rsync
-- Upgrade system (disabled by default)
-- Check for orphans and dropped packages
-- Update the mirror list
+- Remove orphans and dropped packages
+- Update the mirror list using reflector
 - Clear package cache
-- Remove duplicates using rmlint
+- Upgrade system (disabled by default)
+- Remove duplicates using rmlint (disabled by default)
 
 After successful execution, the script produces report.txt at the script directory where there is a list of any errors by any of the procedures or the script itself. It is highly recommended to check the report and act on any manual user intervention needed.
 ## Configuration
 Before running the script alter any global $variables according to your system/preferences. Each variable has a description of use.
-It is recommended that the script is run through a cron job to keep the system regularly maintained.
-Also make sure to make the script executable with `chmod +x alsm`
 ## Dependencies
 Get all the required packages to run the script at its full potential with  
 `sudo pacman -S rsync rmlint reflector`
+## Usage
+`cd ./ALSM`
+`chmod +x alsm`
+`sudo ./alsm`
 ## Disclaimer
-This script is considered safe to use as it follows best practices found in the Arch wiki and it is generally risk averse. However, proper configuration and use of the script is required to get the desired results and by no way is the author of this script responsible for any unwanted results to your system.
+This script is considered safe to use as it follows best practices found in the Arch wiki and it is generally risk averse. However, proper configuration and use of the script is required to get the desired results and by no way is the author of this script responsible for any unwanted results to your system. It is highly recommended that the user reads the source code and alters it if necessary to suit the system before executing it.

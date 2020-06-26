@@ -5,20 +5,42 @@
 # Please read carefully the README.md
 
 # CONFIGURATION #
+# Avoid enviromental variables set in your user to avoid unexpected behavior
+# Since the script will run as root every reference to enviromental variables will use root's env variables
+
+# Please fill the variable below with the username that you want the script to act on
+# If you are unsure about your username run $ whoami on your shell
+user=""
+
 # The path where the final report will be outputted to
-# Default: $HOME
-rp=$HOME/report.txt
-# What should be backed up
-# Default: $HOME
-bp=$HOME
-# How many package versions to keep in cache
-# Default: 1
-pc=1
+# Default: /home/$user/report.txt
+rp="/home/$user/report.txt"
+
+# What (path) should be backed up (recursively)
+# Default: /home/$user
+bp_src="/home/$user/"
+
+# Where (path) $bp_src should be backed up at
+# Default: /home/$user/alsm-backup
+bp_target="/home/$user/alsm-backup"
+
+# How many package versions to keep in pacman cache
+# Default: 3
+pc=3
+
 # Where to redirect original output of commands
+# If you wish to run the script in a live shell and see progress use "/dev/stdout"
 # Default: /dev/null
 out="/dev/null"
 
-printf "--- ALSM Report created on $(date) --- \n\n" > $rp
+if [ -n "$user" ]
+then
+	printf "### ALSM Report created on $(date) ###\n\n" > $rp
+else
+	printf '[ERROR] Script variable $user is empty\n'
+	printf 'Please fill the variable $user with the username that you want the script to act on before running the script\n'
+	exit 1
+fi
 
 # PROCEDURES #
 # Check for errors
@@ -47,33 +69,40 @@ else
 fi
 
 # Backup
-# If the enviromental variable $BACKUP with a backup path is set then create backup there
-if [ -v $BACKUP ]
+# Please read https://wiki.archlinux.org/index.php/Rsync for more details
+rsync -a -r --delete --quiet --exclude={""} $bp_src $bp_target && printf "[DONE] Succesfully backed up $bp_src to $bp_target \n\n" >> $rp || printf "[ERROR] Couldn't backup $bp_src to $bp_target \n\n" >> $rp
+
+# Remove orphans/unused packages
+unused_pkgs=$(pacman -Qdtq | wc -l)
+if [ $unused_pkgs -gt 0 ]
 then
-	rsync -a -r --delete --quiet --exclude={""} $bp $BACKUP && printf "[DONE] Succesfully backed up $bp to $BACKUP \n\n" >> $rp
+	yes | pacman -Rsn $(pacman -Qdtq) >> $out && printf "[DONE] Succesfully removed unused dependencies \n\n" >> $rp || printf "[ERROR] Couldn't remove unused dependencies \n\n" >> $rp
 else
-	printf "[ATTENTION] Enviromental variable \$BACKUP not set. No backup has been done.\n\n" >> $rp
+	printf "[DONE] There are no unusued dependencies to be removed \n\n" >> $rp
 fi
+
+# Update mirror list
+reflector --latest 100 --protocol http --protocol https --sort rate --save /etc/pacman.d/mirrorlist >> $out && printf "[DONE] Succesfully updated and sorted the mirror list \n\n" >> $rp || printf "[ERROR] Couldn't update and sorte the mirror list \n\n" >> $rp
+
+# Clean the filesystem
+# Clear pacman cache
+paccache -rk$pc >> $out && printf "[DONE] Succesfully cleared cache and left just the $pc latest version(s) of each cached package \n\n" >> $rp || printf "[ERROR] Couldn't cleare the pacman cache \n\n" >> $rp
+# Comment line below if you do not want to remove cache of uninstalled packages
+paccache -ruk0 >> $out && printf "[DONE] Succesfully cleared cache of all uninstalled packages \n\n" >> $rp || printf "[ERROR] Couldn't clear the cache of all uninstalled packages \n\n" >> $rp
+
+## Disabled (risky) functionality ##
 
 # System Upgrade
 # It is not recommended to uncomment the line below because upgrading your system will possibly require user intervention
 # and it is generally a serious task that shouldn't be automated. Only uncomment this line if you have read this https://wiki.archlinux.org/index.php/System_maintenance#Read_before_upgrading_the_system
-#yes | pacman -Syu && printf "[DONE] Succesfully upgraded system\n">> $rp
-
-# Remove orphans/unused packages
-yes | pacman -Rsn $(pacman -Qdtq) > $out && printf "[DONE] Succesfully removed unused dependencies \n" >> $rp
-
-# Update mirror list
-reflector --latest 100 --protocol http --protocol https --sort rate --save /etc/pacman.d/mirrorlist && printf "[DONE] Succesfully updated and sorted the mirror list \n\n" >> $rp
-
-# Clean the filesystem
-# Clear pacman cache
-paccache -rk$pc > $out && printf "[DONE] Succesfully cleared cache and left just the $pc latest version(s) of each cached package \n\n" >> $rp
-# Comment line below if you do not want to remove cache of uninstalled packages
-paccache -ruk0 > $out && printf "[DONE] Succesfully cleared cache of all uninstalled packages \n\n" >> $rp
+#yes | pacman -Syu && printf "[DONE] Succesfully upgraded system\n">> $rp || printf "[ERROR] Couldn't upgrade system\n">> $rp
 
 # Remove duplicates
-printf "rmlint $HOME:\n" >> $rp
-rmlint $HOME | tail -n7 | head -n4 >> $rp
-yes | bash rmlint.sh -d > $out && printf "[DONE] Succesfully removed duplicate files with rmlint \n" >> $rp
-rm rmlint.*
+# These lines are commented to prevent the unwanted deletion of files
+# It is not recommended to uncomment the lines below without first doing a dry run of $ rmlint and inspecting what files will be removed
+#printf "rmlint $HOME:\n" >> $rp
+#rmlint $HOME | tail -n7 | head -n4 >> $rp
+#yes | bash rmlint.sh -d >> $out && printf "[DONE] Succesfully removed duplicate files with rmlint \n" >> $rp || printf "[ERROR] Couldn't remove duplicate files with rmlint \n" >> $rp
+#rm rmlint.*
+
+chown $user $rp $bp_target >> $out
