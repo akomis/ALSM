@@ -9,12 +9,11 @@ A simple bash script that mainly follows the [System maintenance](https://wiki.a
 - Update the mirror list using reflector
 - Clear package cache
 
-Disabled functionality:
+Disabled functionalities:
 - Upgrade system
 - Remove duplicates using rmlint
-- Backup data using rsync
-For enabling the above functionalities one should make sure to read the corresponding source code, understand the risks of automating such procedures and configure it carefully (through configuration and uncommenting the corresponding lines) for the desired effects to take place.
-
+- Backup data using rsync  
+For enabling the above functionalities one should make sure to read the corresponding source code, understand the risks of automating such procedures and changing the source code carefully (through the configuration and uncommenting of the corresponding lines) for the desired effects to take place.  
 After successful execution, the script produces report.txt at the specified directory where there is a status message for each procedure done by the script. It is highly recommended to check the report and act on any manual user intervention needed.
 ## Configuration
 Before running the script alter any global $variables according to your system/preferences. Each variable has a description of use found in the source code as a comment above it.
