@@ -5,12 +5,15 @@ A simple bash script that mainly follows the [System maintenance](https://wiki.a
 *as described in the Arch wiki*
 - Check if any systemd services have entered in a failed state
 - Look for errors in the log files located at /var/log, as well as high priority
-- Backup data using rsync
 - Remove orphans and dropped packages
 - Update the mirror list using reflector
 - Clear package cache
-- Upgrade system (disabled by default)
-- Remove duplicates using rmlint (disabled by default)
+
+Disabled functionality:
+- Upgrade system
+- Remove duplicates using rmlint
+- Backup data using rsync
+For enabling the above functionalities one should make sure to read the corresponding source code, understand the risks of automating such procedures and configure it carefully (through configuration and uncommenting the corresponding lines) for the desired effects to take place.
 
 After successful execution, the script produces report.txt at the specified directory where there is a status message for each procedure done by the script. It is highly recommended to check the report and act on any manual user intervention needed.
 ## Configuration

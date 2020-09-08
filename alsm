@@ -68,10 +68,6 @@ else
 	printf "[SAFE] No errors found in /var/log logfiles.\n\n" >> $rp
 fi
 
-# Backup
-# Please read https://wiki.archlinux.org/index.php/Rsync for more details
-rsync -a -r --delete --quiet --exclude={""} $bp_src $bp_target && printf "[DONE] Succesfully backed up $bp_src to $bp_target \n\n" >> $rp || printf "[ERROR] Couldn't backup $bp_src to $bp_target \n\n" >> $rp
-
 # Remove orphans/unused packages
 unused_pkgs=$(pacman -Qdtq | wc -l)
 if [ $unused_pkgs -gt 0 ]
@@ -105,4 +101,7 @@ paccache -ruk0 >> $out && printf "[DONE] Succesfully cleared cache of all uninst
 #yes | bash rmlint.sh -d >> $out && printf "[DONE] Succesfully removed duplicate files with rmlint \n" >> $rp || printf "[ERROR] Couldn't remove duplicate files with rmlint \n" >> $rp
 #rm rmlint.*
 
-chown $user $rp $bp_target >> $out
+# Backup
+# Please read https://wiki.archlinux.org/index.php/Rsync for more details
+#rsync -a -r --delete --quiet --exclude={""} $bp_src $bp_target && printf "[DONE] Succesfully backed up $bp_src to $bp_target \n\n" >> $rp || printf "[ERROR] Couldn't backup $bp_src to $bp_target \n\n" >> $rp
+#chown $user $rp $bp_target >> $out
