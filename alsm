@@ -78,11 +78,11 @@ else
 fi
 
 # Update mirror list
-reflector --latest 100 --protocol http --protocol https --sort rate --save /etc/pacman.d/mirrorlist >> $out && printf "[DONE] Succesfully updated and sorted the mirror list \n\n" >> $rp || printf "[ERROR] Couldn't update and sorte the mirror list \n\n" >> $rp
+reflector --latest 100 --protocol http --protocol https --sort rate --save /etc/pacman.d/mirrorlist >> $out && printf "[DONE] Succesfully updated and sorted the mirror list \n\n" >> $rp || printf "[ERROR] Couldn't update and sorted the mirror list \n\n" >> $rp
 
 # Clean the filesystem
 # Clear pacman cache
-paccache -rk$pc >> $out && printf "[DONE] Succesfully cleared cache and left just the $pc latest version(s) of each cached package \n\n" >> $rp || printf "[ERROR] Couldn't cleare the pacman cache \n\n" >> $rp
+paccache -rk$pc >> $out && printf "[DONE] Succesfully cleared cache and left just the $pc latest version(s) of each cached package \n\n" >> $rp || printf "[ERROR] Couldn't clear the pacman cache \n\n" >> $rp
 # Comment line below if you do not want to remove cache of uninstalled packages
 paccache -ruk0 >> $out && printf "[DONE] Succesfully cleared cache of all uninstalled packages \n\n" >> $rp || printf "[ERROR] Couldn't clear the cache of all uninstalled packages \n\n" >> $rp
 
