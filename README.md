@@ -23,7 +23,7 @@ Before running the script alter any global $variables according to your system/p
 Get all the required packages to run the script at its full potential with  
 `sudo pacman -S rsync rmlint reflector`
 ## Usage
-`cd ./ALSM`  
+`cd ./alsm`  
 `chmod +x alsm`  
 `sudo ./alsm`  
 ## Disclaimer
